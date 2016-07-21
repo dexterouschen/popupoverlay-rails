@@ -1,7 +1,7 @@
 /*!
  * jQuery Popup Overlay
  *
- * @version 1.7.10
+ * @version 1.7.13
  * @requires jQuery v1.7.1+
  * @link http://vast-engineering.github.com/jquery-popup-overlay/
  */
@@ -84,7 +84,33 @@
 
             $el.addClass('popup_content');
 
-            $body.prepend(el);
+            if ((options.background) && (!$('#' + el.id + '_background').length)) {
+
+                $body.append('<div id="' + el.id + '_background" class="popup_background"></div>');
+
+                var $background = $('#' + el.id + '_background');
+
+                $background.css({
+                    opacity: 0,
+                    visibility: 'hidden',
+                    backgroundColor: options.color,
+                    position: 'fixed',
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                    left: 0
+                });
+
+                if (options.setzindex && !options.autozindex) {
+                    $background.css('z-index', '100000');
+                }
+
+                if (options.transition) {
+                    $background.css('transition', options.transition);
+                }
+            }
+
+            $body.append(el);
 
             $el.wrap('<div id="' + el.id + '_wrapper" class="popup_wrapper" />');
 
@@ -127,32 +153,6 @@
             // Hide popup content from screen readers initially
             $el.attr('aria-hidden', true);
 
-            if ((options.background) && (!$('#' + el.id + '_background').length)) {
-
-                $body.prepend('<div id="' + el.id + '_background" class="popup_background"></div>');
-
-                var $background = $('#' + el.id + '_background');
-
-                $background.css({
-                    opacity: 0,
-                    visibility: 'hidden',
-                    backgroundColor: options.color,
-                    position: 'fixed',
-                    top: 0,
-                    right: 0,
-                    bottom: 0,
-                    left: 0
-                });
-
-                if (options.setzindex && !options.autozindex) {
-                    $background.css('z-index', '100000');
-                }
-
-                if (options.transition) {
-                    $background.css('transition', options.transition);
-                }
-            }
-
             if (options.type == 'overlay') {
                 $el.css({
                     textAlign: 'left',
@@ -170,7 +170,7 @@
                 };
 
                 if(options.backgroundactive){
-                    css.position = 'relative';
+                    css.position = 'absolute';
                     css.height = '0';
                     css.overflow = 'visible';
                 }
@@ -417,6 +417,13 @@
             } else {
                 callback(el, ordinal, options.opentransitionend);
             }
+
+            // Handler: Reposition tooltip when window is resized
+            if (options.type == 'tooltip') {
+                $(window).on('resize.' + el.id, function () {
+                    methods.reposition(el, ordinal);
+                });
+            }
         },
 
         /**
@@ -538,6 +545,9 @@
                 callback(el, lastclicked[el.id], options.closetransitionend);
             }
 
+            if (options.type == 'tooltip') {
+                $(window).off('resize.' + el.id);
+            }
         },
 
         /**
@@ -646,8 +656,8 @@
                 genericCloseButton = '<button class="popup_close ' + el.id + '_close" title="Close" aria-label="Close"><span aria-hidden="true">×</span></button>';
             }
 
-            if ($el.data('popup-initialized')){
-                $el.append(genericCloseButton);
+            if ($(el).data('popup-initialized')){
+                $(el).append(genericCloseButton);
             }
 
         }
@@ -771,7 +781,7 @@
             var $el = $(this);
 
             if (typeof customoptions === 'object') {  // e.g. $('#popup').popup({'color':'blue'})
-                var opt = $.extend({}, $.fn.popup.defaults, customoptions, $el.data('popupoptions'));
+                var opt = $.extend({}, $.fn.popup.defaults, $el.data('popupoptions'), customoptions);
                 $el.data('popupoptions', opt);
                 options = $el.data('popupoptions');
 
