@@ -17,7 +17,7 @@ Add the following directive to your Javascript manifest file (application.js):
 ```
 
 ## Versioning
-popupoverlay-rails 1.7.10 == jquery-popupi-overlay 1.7.10
+popupoverlay-rails 1.7.13 == jquery-popupi-overlay 1.7.13
 
 ## Contributing
 
